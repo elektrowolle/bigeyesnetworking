@@ -5,20 +5,15 @@ BEN::BEN (int pin, int address, void (*userFunc)(void)) {
 	this->PIN     = pin;
 	this->intFunc = userFunc;
 
-	BENClass::attach(this->PIN, this->intFunc);
+	bc.attach(this->PIN, this->intFunc);
 }
 
 bool BEN::send (int address, char *message[] ) {
 	return false;
 }
 
-void BENClass::attach (int pin, void (*userFunc)(void)) {
-	BENClass::init();
-	BENClass::intFunc[pin] = (uintptr_t) &userFunc;
-}
-
 void BENClass::init () {
-	if(!BENClass::ENABLED) {
+	if(!INITIALISED) {
 		cli();
 
 		if(MCUSR & _BV(WDRF)){            // If a reset was caused by the Watchdog Timer...
@@ -26,14 +21,20 @@ void BENClass::init () {
 	    	WDTCSR |= (_BV(WDCE) | _BV(WDE));     // Enable the WD Change Bit
 	    	WDTCSR  = 0x00;                       // Disable the WDT
 		} else 
+
 		{
 			// Set up Watch Dog Timer for Inactivity
 			WDTCSR |= (_BV(WDCE) | _BV(WDE));       // Enable the WD Change Bit
-			WDTCSR  =   _BV(WDIE);// |              // Enable WDT Interrupt
-			           //_BV(WDP2) | _BV(WDP1);     // Set Timeout to .16 seconds
+			WDTCSR  =  _BV(WDIE);// |               // Enable WDT Interrupt
+			           //_BV(WDP2) | _BV(WDP1);     // Set Timeout to ~1 seconds
 			sei();
 		}
+		INITIALISED = true;
 	}
+}
+
+void BENClass::enable() {
+	ENABLED = true;
 }
 
 void BENClass::trigger(int pin) {
@@ -41,11 +42,25 @@ void BENClass::trigger(int pin) {
 	_funcPtr();
 }
 
+void BENClass::attach(int pin, void (*userFunc)(void)) {
+	//init();
+	intFunc[pin] = (uintptr_t) userFunc;
+}
+
+BENClass::BENClass() {
+	INITIALISED = false;
+}
+
+void BENClass::listen() {
+
+}
+
+BENClass bc;
 
 ISR (WDT_vect) {
 	//sleep_disable();        // Disable Sleep on Wakeup
 
- 	BENClass::listen();
+ 	//bc.listen();
 
  	//sleep_enable();         // Enable Sleep Mode
 }

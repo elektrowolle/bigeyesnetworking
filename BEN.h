@@ -4,6 +4,17 @@
 #include <avr/pgmspace.h>
 #include <stdio.h>
 
+//
+//  Let`s do a time modulated slow but always everywhere available 
+//  network protocol!
+//
+//  HIGH +---v-----v--------+
+//       |    -----         |
+//       |   /     \        |  TODO: This Graph doesn`t have any
+//       |---       --------|        meaning yet
+//   LOW +---^-----^--------+
+//       0   1     2
+//
 
 #ifndef IO_PINS
 #define IO_PINS    13
@@ -25,19 +36,26 @@ public:
 class BENClass{
 public:
 	//FLAGS
-	static bool ENABLED    ;
-	static bool INITIALISED;
+	bool ENABLED    ;
+	bool INITIALISED;
 	
 	//VARIABLES
-	static uintptr_t intFunc           [ IO_PINS    ];
-	static char      *submissionBuffer [ BUFFERSIZE ];
-	static char      *receiverBuffer   [ BUFFERSIZE ];
+	uintptr_t intFunc           [ IO_PINS    ];
+	char      *submissionBuffer [ BUFFERSIZE ];
+	char      *receiverBuffer   [ BUFFERSIZE ];
 	
 	//FUNCTIONS
-	static void init    (   );
-	static void enable  (   );
-	static void listen  (   );
-	static void attach  ( int pin, void (*) (void) );
-	static void trigger ( int pin );
-};
 
+	BENClass ();
+	void init    (   );
+	void enable  (   );
+	void listen  (   );
+	void attach  ( int pin, void (*) (void) );
+	void trigger ( int pin );
+
+};
+#ifndef __INITBC
+#define __INITBC 1
+
+extern BENClass bc;
+#endif
