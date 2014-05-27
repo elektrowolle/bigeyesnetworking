@@ -37,7 +37,7 @@
 //   8: 111-119 MSG   'l' [01101100]
 //   8: 120-128 MSG   'l' [01101100]
 //   8: 129-137 MSG   'o' [01101111]
-//   8: 138-146 CHECK     [10101101]((65h+6Ch+6Ch+6Fh) mod ffh = ADh)
+//   8: 138-146 CHECK     [10101101] ((65h+6Ch+6Ch+6Fh) mod ffh = ADh)
 //   8: 147-155 MSG   '!' [00010001]
 //   8: 156-164 CHECK     [00010001]
 //
@@ -49,41 +49,82 @@
 #define BUFFERSIZE 16
 #endif
 
-class BEN{
+class BEN {
 public:
 	int   PIN ;
 	int   ADDRESS;
+	
+	//FLAGS
+	bool  DATA_AVAILABLE;
+	bool  TRIGGER_ACTIVE;
+
 	void  (*intFunc) (void);
 
 	BEN         ( int pin, int address, void (*) (void) );
+	BEN         ( int pin, int address );
 	~BEN        (  );
 
-	bool send   ( int address, char *message[] );
+	bool send    ( int address, char *message[] );
+	void trigger (  );
 };
 
-class BENClass{
+class BENClass {
 public:
 	//FLAGS
 	bool ENABLED    ;
 	bool INITIALISED;
 	
 	//VARIABLES
-	uintptr_t intFunc           [ IO_PINS    ];
-	char      *submissionBuffer [ BUFFERSIZE ];
-	char      *receiverBuffer   [ BUFFERSIZE ];
+	//uintptr_t intFunc           [ IO_PINS    ];
+
+	BEN   *network          [ IO_PINS    ];
+	char  *submissionBuffer [ BUFFERSIZE ];
+	char  *receiverBuffer   [ BUFFERSIZE ];
 	
 	//FUNCTIONS
 
-	BENClass ();
+	BENClass     (   );
 	void init    (   );
 	void enable  (   );
 	void listen  (   );
-	void attach  ( int pin, void (*) (void) );
+	void attach  ( int pin, BEN *network );
 	void trigger ( int pin );
+	
 
 };
-#ifndef __INITBC
-#define __INITBC 1
+
+struct BENDataPackage {
+public:
+	char encodedMessage [];
+	char sender           ;
+	char receiver         ;
+	char message        [];
+	//char 
+
+	BENDataPackage  ( int   sender    , 
+					  int   receiver  , 
+					  char  message [], 
+					  char  length = 0 );
+
+	BENDataPackage ( char  message[], 
+					 char  length = 0 );
+
+	static bool encode ( int   sender    , 
+						 int   receiver  , 
+						 char  message [],
+						 char  retValue[], 
+						 char  length = 0 );
+	
+	static bool encode ( BENDataPackage *package, char retValue[] );
+    
+    static BENDataPackage decode ( char  message[], 
+						 		   char  length = 0 );
+
+    static char calculateEncodedLength ( char messageLength );
+
+    static char checkSum ( char message[], char messageLength );
+
+    bool encode();
+};
 
 extern BENClass bc;
-#endif
