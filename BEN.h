@@ -71,22 +71,30 @@ public:
 class BENClass {
 public:
 	//FLAGS
-	bool ENABLED    ;
-	bool INITIALISED;
+	bool ENABLED       ;
+	bool INITIALISED   ;
+	bool RECEIVING     ;
+	bool receivedPREFIX;
+
 	
 	//VARIABLES
-	//uintptr_t intFunc           [ IO_PINS    ];
-
 	BEN   *network          [ IO_PINS    ];
 	char  *submissionBuffer [ BUFFERSIZE ];
 	char  *receiverBuffer   [ BUFFERSIZE ];
 	
-	//FUNCTIONS
+	char  receivedByteBuffer;
+	char  receivedByteBufferPosition;
 
+	const static char PREFIX = 0x55;
+	
+	//FUNCTIONS
 	BENClass     (   );
 	void init    (   );
 	void enable  (   );
-	void listen  (   );
+	
+	void listen  ( bool receivedBit  );
+	void listen  ( char receivedByte );
+
 	void attach  ( int pin, BEN *network );
 	void trigger ( int pin );
 	

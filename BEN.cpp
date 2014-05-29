@@ -66,12 +66,50 @@ void BENClass::attach(int pin, BEN *newNetwork) {
 }
 
 BENClass::BENClass() {
-	INITIALISED = false;
+	INITIALISED    = false;
+	RECEIVING      = false;
+	receivedPREFIX = false;
+
+	receivedByteBuffer         = 0;
+	receivedByteBufferPosition = 0;
 }
 
-void BENClass::listen() {
+void BENClass::listen(bool receivedBit) {
+	
+	//  I'll probably forget one day what I've been doing here. So I'll explain about
+	//  Everytime this method is called we get one new bit. Also this method utilize
+	//  The members [receivedByteBuffer], [receivedByteBufferPosition], the 
+	//  flag [receivedPREFIX] and the mask [PREFIX].
+	//
+	//  Basically the purpose of this method is to collect single bits and arange 
+	//  them to a byte to give them to the byte[listen]er which will process this 
+	//  byte. At the same time it does some funny but necessary checks.
+	//
+	//   (Starbucks is closing. I have to leave.)
+
+	receivedByteBuffer += (receivedByteBuffer ? 1 : 0) << 7 - receivedByteBufferPosition;
+	receivedByteBufferPosition++;
+
+	if(!receivedPREFIX && receivedByteBufferPosition > 1
+		&& receivedByteBuffer != PREFIX & (0xff << 7 - receivedByteBufferPosition) {
+		
+		receivedByteBuffer = 0;
+		receivedByteBufferPosition = 0;
+	}
+	
+	if (receivedByteBufferPosition > 7) {
+		listen(receivedByteBuffer);
+
+		receivedByteBuffer         = 0;
+		receivedByteBufferPosition = 0;
+	}
+}
+
+void BENClass::listen(char receivedByte) {
 
 }
+
+
 
 BENClass bc;
 
@@ -83,7 +121,7 @@ bool BENDataPackage::encode(int   sender    ,
 							int   receiver  , 
 							char  message [],
 							char  retValue[], 
-							char  length    ){
+							char  length    ) {
 	
 
 	char _length    = length > 0 ? length : sizeof message;
@@ -122,7 +160,7 @@ bool BENDataPackage::encode(int   sender    ,
 	return false;
 }
 
-bool BENDataPackage::encode(BENDataPackage *package, char retValue[]){
+bool BENDataPackage::encode(BENDataPackage *package, char retValue[]) {
 	return BENDataPackage::encode(package->sender  , 
 								  package->receiver,
 								  package->message ,
@@ -141,7 +179,7 @@ char BENDataPackage::calculateEncodedLength(char messageLength) {
 	     _retLength += _checks;
 }
 
-char BENDataPackage::checkSum(char message[], char messageLength){
+char BENDataPackage::checkSum(char message[], char messageLength) {
 	char _length = messageLength > 0 ? messageLength : sizeof message;
 	char _sum    = 0;
 	
