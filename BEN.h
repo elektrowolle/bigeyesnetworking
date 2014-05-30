@@ -97,6 +97,8 @@ public:
 
 	void attach  ( int pin, BEN *network );
 	void trigger ( int pin );
+
+	static bool isPrefix ( char byteToCheck, char length );
 	
 
 };
@@ -109,10 +111,10 @@ public:
 	char message        [];
 	//char 
 
-	BENDataPackage  ( int   sender    , 
-					  int   receiver  , 
-					  char  message [], 
-					  char  length = 0 );
+	BENDataPackage ( int   sender    , 
+					 int   receiver  , 
+					 char  message [], 
+					 char  length = 0 );
 
 	BENDataPackage ( char  message[], 
 					 char  length = 0 );
