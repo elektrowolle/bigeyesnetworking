@@ -51,84 +51,84 @@
 
 class BEN {
 public:
-	int   PIN ;
-	int   ADDRESS;
-	
-	//FLAGS
-	bool  DATA_AVAILABLE;
-	bool  TRIGGER_ACTIVE;
+    int   PIN ;
+    int   ADDRESS;
+    
+    //FLAGS
+    bool  DATA_AVAILABLE;
+    bool  TRIGGER_ACTIVE;
 
-	void  (*intFunc) (void);
+    void  (*intFunc) (void);
 
-	BEN         ( int pin, int address, void (*) (void) );
-	BEN         ( int pin, int address );
-	~BEN        (  );
+    BEN         ( int pin, int address, void (*) (void) );
+    BEN         ( int pin, int address );
+    ~BEN        (  );
 
-	bool send    ( int address, char *message[] );
-	void trigger (  );
+    bool send    ( int address, char *message[] );
+    void trigger (  );
 };
 
 class BENClass {
 public:
-	//FLAGS
-	bool ENABLED       ;
-	bool INITIALISED   ;
-	bool RECEIVING     ;
-	bool receivedPREFIX;
+    //FLAGS
+    bool ENABLED       ;
+    bool INITIALISED   ;
+    bool RECEIVING     ;
+    bool receivedPREFIX;
 
-	
-	//VARIABLES
-	BEN   *network          [ IO_PINS    ];
-	char  *submissionBuffer [ BUFFERSIZE ];
-	char  *receiverBuffer   [ BUFFERSIZE ];
-	
-	char  receivedByteBuffer;
-	char  receivedByteBufferPosition;
+    
+    //VARIABLES
+    BEN   *network          [ IO_PINS    ];
+    char  *submissionBuffer [ BUFFERSIZE ];
+    char  *receiverBuffer   [ BUFFERSIZE ];
+    
+    char  receivedByteBuffer;
+    char  receivedByteBufferPosition;
 
-	const static char PREFIX = 0x55;
-	
-	//FUNCTIONS
-	BENClass     (   );
-	void init    (   );
-	void enable  (   );
-	
-	void listen  ( bool receivedBit  );
-	void listen  ( char receivedByte );
+    const static char PREFIX = 0x55;
+    
+    //FUNCTIONS
+    BENClass     (   );
+    void init    (   );
+    void enable  (   );
+    
+    void listen  ( bool receivedBit  );
+    void listen  ( char receivedByte );
 
-	void attach  ( int pin, BEN *network );
-	void trigger ( int pin );
+    void attach  ( int pin, BEN *network );
+    void trigger ( int pin );
 
-	static bool isPrefix ( char byteToCheck, char length );
-	
+    static bool isPrefix ( char byteToCheck, char length );
+    
 
 };
 
 struct BENDataPackage {
 public:
-	char encodedMessage [];
-	char sender           ;
-	char receiver         ;
-	char message        [];
-	//char 
+    char encodedMessage [];
+    char sender           ;
+    char receiver         ;
+    char message        [];
+    //char 
 
-	BENDataPackage ( int   sender    , 
-					 int   receiver  , 
-					 char  message [], 
-					 char  length = 0 );
+    BENDataPackage ( int   sender    , 
+                     int   receiver  , 
+                     char  message [], 
+                     char  length = 0 );
 
-	BENDataPackage ( char  message[], 
-					 char  length = 0 );
+    BENDataPackage ( char  message[], 
+                     char  length = 0 );
 
-	static bool encode ( int   sender    , 
-						 int   receiver  , 
-						 char  message [],
-						 char  retValue[], 
-						 char  length = 0 );
-	
-	static bool encode ( BENDataPackage *package, char retValue[] );
+    static bool encode ( int   sender    , 
+                         int   receiver  , 
+                         char  message [],
+                         char  retValue[], 
+                         char  length = 0 );
+    
+    static bool encode ( BENDataPackage *package, char retValue[] );
     
     static BENDataPackage decode ( char  message[], 
-						 		   char  length = 0 );
+                                   char  length = 0 );
 
     static char calculateEncodedLength ( char messageLength );
 
