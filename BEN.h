@@ -49,14 +49,52 @@
 #define BUFFERSIZE 16
 #endif
 
+#ifndef BEN_PROPERTIES
+#define DEFAULT_STATES             0x00
+#define DATA_AVAILABLE             0x01
+#define TRIGGER_ACTIVE             0x02
+#define RECEIVED_PREFIX            0x04
+#define LISTEN_TO_SENDER_ADDRESS   0x08
+#define LISTEN_TO_RECEIVER_ADDRESS 0x10
+#define RECEIVING_MESSAGE_LENGTH   0x20
+#define RECEIVING_MESSAGE          0x40
+#define CHECKSUMS_ARE_CORRECT      0x80
+#endif 
+
 class BEN {
 public:
     int   PIN ;
     int   ADDRESS;
+
+    char  *submissionBuffer [ BUFFERSIZE ];
+    char  *receiverBuffer   [];
+
+    char  receivedBitBuffer;
+    char  receivedBitBufferPosition;
+
+    BENDataPackage *availableData;
     
     //FLAGS
-    bool  DATA_AVAILABLE;
-    bool  TRIGGER_ACTIVE;
+
+    //
+    //  [0000 0000]
+    //   |||| |||\___{  1} DATA_AVAILABLE
+    //   |||| ||\____{  2} TRIGGER_ACTIVE
+    //   |||| |\_____{  4} RECEIVED_PREFIX
+    //   |||| \______{  8} LISTEN_TO_SENDER_ADDRESS
+    //   |||\________{ 16} LISTEN_TO_RECIVER_ADDRESS
+    //   ||\_________{ 32} RECEIVING_MESSAGE_LENGTH
+    //   |\__________{ 64} RECEIVING_MESSAGE
+    //   \___________{128} CHECKSUMS_ARE_CORRECT
+
+    
+    char messageLength;
+    char STATES;
+
+
+
+
+
 
     void  (*intFunc) (void);
 
@@ -64,26 +102,35 @@ public:
     BEN         ( int pin, int address );
     ~BEN        (  );
 
-    bool send    ( int address, char *message[] );
-    void trigger (  );
+    bool send           ( int address, char *message[] );
+    void trigger        (  );
+
+    //DECODING
+    void listen         ( bool receivedBit  );
+    void listen         ( char receivedByte );
+    
+    void resetBitBuffer (  );
+    void resetFlags     (  );
 };
 
 class BENClass {
 public:
+
+    //  
+    //  TODO:
+    //  Some of these flags need to be moved to [BEN] to make multiple
+    //  connetions at the same time possible.
+    //  
+
     //FLAGS
     bool ENABLED       ;
     bool INITIALISED   ;
     bool RECEIVING     ;
-    bool receivedPREFIX;
+
 
     
     //VARIABLES
-    BEN   *network          [ IO_PINS    ];
-    char  *submissionBuffer [ BUFFERSIZE ];
-    char  *receiverBuffer   [ BUFFERSIZE ];
-    
-    char  receivedByteBuffer;
-    char  receivedByteBufferPosition;
+    BEN   *network          [ IO_PINS ];
 
     const static char PREFIX = 0x55;
     
@@ -92,8 +139,7 @@ public:
     void init    (   );
     void enable  (   );
     
-    void listen  ( bool receivedBit  );
-    void listen  ( char receivedByte );
+
 
     void attach  ( int pin, BEN *network );
     void trigger ( int pin );
@@ -108,7 +154,7 @@ public:
     char encodedMessage [];
     char sender           ;
     char receiver         ;
-    char message        [];
+    char *message        [];
     //char 
 
     BENDataPackage ( int   sender    , 
