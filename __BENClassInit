@@ -1,0 +1,18 @@
+    // if(!INITIALISED) {
+    //     cli();
+
+    //     if(MCUSR & _BV(WDRF)){            // If a reset was caused by the Watchdog Timer...
+    //         MCUSR  &= ~_BV(WDRF);                 // Clear the WDT reset flag
+    //         WDTCSR |= (_BV(WDCE) | _BV(WDE));     // Enable the WD Change Bit
+    //         WDTCSR  = 0x00;                       // Disable the WDT
+    //     } else 
+
+    //     {
+    //         // Set up Watch Dog Timer for Inactivity
+    //         WDTCSR |= (_BV(WDCE) | _BV(WDE));       // Enable the WD Change Bit
+    //         WDTCSR  =  _BV(WDIE);// |               // Enable WDT Interrupt
+    //                    //_BV(WDP2) | _BV(WDP1);     // Set Timeout to ~1 seconds
+    //         sei();
+    //     }
+    //     INITIALISED = true;
+    // }
