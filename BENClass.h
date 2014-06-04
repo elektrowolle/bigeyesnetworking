@@ -6,7 +6,7 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 #include <stdio.h>
-//#include "BENClass.h"
+
 #include "Utility.hpp"
 #include "BENDataPackage.h"
 #include "BENNetwork.h"
@@ -22,9 +22,7 @@ namespace BEN {
         bool RECEIVING     ;
 
         //VARIABLES
-        BEN* network [ IO_PINS ];
-
-        const static char PREFIX = 0x55;
+        BENNetwork* network [ IO_PINS ];
         
         //FUNCTIONS
         BENClass     (   );
@@ -33,7 +31,7 @@ namespace BEN {
         
 
 
-        void attach  ( int pin, BEN *network );
+        void attach  ( int pin, BENNetwork *network );
         void trigger ( int pin );
 
         

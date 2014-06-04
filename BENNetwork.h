@@ -1,8 +1,10 @@
 #ifndef ___BEN_H___
 #define ___BEN_H___
 
+#include "Utility.hpp"
+#include "BENDataPackage.h"
+
 namespace BEN {
-    class BENDataPackage;
     //class BENClass;
 
     //#include "BENDataPackage.h"
@@ -47,28 +49,9 @@ namespace BEN {
     //   8: 156-164 CHECK     [00010001]
     //
 
-    #ifndef IO_PINS
-    #define IO_PINS    13
-    #define BUFFERSIZE 16
-    #endif
+    class BENDataPackage;
 
-    #ifndef __BEN_PROPERTIES
-    #define __BEN_PROPERTIES 1
-    #define DEFAULT_STATES             0x00
-    #define DATA_AVAILABLE             0x01
-    #define TRIGGER_ACTIVE             0x02
-    #define RECEIVED_PREFIX            0x04
-    #define LISTEN_TO_SENDER_ADDRESS   0x08
-    #define LISTEN_TO_RECEIVER_ADDRESS 0x10
-    #define RECEIVING_MESSAGE_LENGTH   0x20
-    #define RECEIVING_MESSAGE          0x40
-    #define CHECKSUMS_ARE_CORRECT      0x80
-    #endif 
-
-
-
-
-    class BEN {
+    class BENNetwork {
     public:
         int   PIN ;
         int   ADDRESS;
@@ -79,7 +62,7 @@ namespace BEN {
         char  receivedBitBuffer;
         char  receivedBitBufferPosition;
 
-        BENDataPackage *availableData;
+        BENDataPackage* availableData;
         
         //FLAGS
 
@@ -99,9 +82,9 @@ namespace BEN {
 
         void  (*intFunc) (void);
 
-        BEN         ( int pin, int address, void (*) (void) );
-        BEN         ( int pin, int address );
-        ~BEN        (  );
+        BENNetwork          ( int pin, int address, void (*) (void) );
+        BENNetwork          ( int pin, int address );
+        ~BENNetwork         (  );
 
         bool send           ( int address, char *message[] );
         void trigger        (  );

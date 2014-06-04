@@ -1,10 +1,10 @@
 #include "BENNetwork.h"
-#include "BENDataPackage.h"
+//#include "BENDataPackage.h"
 
-namespace BENNetwork {
+namespace BEN {
 
     BENNetwork::BENNetwork(int pin, int address, void (*userFunc)(void)) {
-        BEN(pin, address);
+        BENNetwork(pin, address);
 
         this->intFunc = userFunc;
     }

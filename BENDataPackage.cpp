@@ -4,8 +4,8 @@
 //
 namespace BEN {
 
-    bool BENDataPackage::encode(int   sender    , 
-                                int   receiver  , 
+    bool BENDataPackage::encode(int  &sender    , 
+                                int  &receiver  , 
                                 char  message [],
                                 char  retValue[], 
                                 char  length    ) {
@@ -45,7 +45,7 @@ namespace BEN {
     bool BENDataPackage::encode(BENDataPackage* package, char retValue[]) {
         return BENDataPackage::encode(package->sender  , 
                                       package->receiver,
-                                      &package->message ,
+                                      package->message ,
                                       retValue,
                                       (char)0);
     }

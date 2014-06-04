@@ -16,7 +16,7 @@ namespace BEN {
 	    network[pin]->trigger();
 	}
 
-	void BENClass::attach(int pin, BEN *newNetwork) {
+	void BENClass::attach(int pin, BENNetwork *newNetwork) {
 	    network[pin] = newNetwork;
 	}
 

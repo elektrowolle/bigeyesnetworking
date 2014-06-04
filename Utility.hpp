@@ -1,13 +1,10 @@
-#ifndef ___UTILITY_H___
-#define ___UTILITY_H___
-
 #ifndef IO_PINS
 #define IO_PINS    13
 #define BUFFERSIZE 16
 #endif
 
 #ifndef __BEN_PROPERTIES
-#define __BEN_PROPERTIES 1
+#define __BEN_PROPERTIES
 #define DEFAULT_STATES             0x00
 #define DATA_AVAILABLE             0x01
 #define TRIGGER_ACTIVE             0x02
@@ -19,14 +16,18 @@
 #define CHECKSUMS_ARE_CORRECT      0x80
 #endif 
 
+
+#ifndef ___UTILITY_H___
+#define ___UTILITY_H___
+
 namespace BEN {
 
 	const static char PREFIX = 0x55;
 
-	bool isPrefix(char byteToCheck, char length) {
+	static bool isPrefix(char byteToCheck, char length) {
 
 	    return byteToCheck != PREFIX & (0xff << 8 - length);
 	}
 }
 
-#endif
+#endif // ___UTILITY_H___

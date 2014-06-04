@@ -7,7 +7,7 @@ namespace BEN {
         char encodedMessage [];
         int  sender           ;
         int  receiver         ;
-        char *message        [];
+        char message        [];
         //char 
         BENDataPackage ( int   sender    , 
                          int   receiver  , 
@@ -19,11 +19,11 @@ namespace BEN {
 
         BENDataPackage (  );
 
-        static bool encode ( int   sender    , 
-                             int   receiver  , 
-                             char  message [],
-                             char  retValue[], 
-                             char  length = 0 );
+        static bool encode ( int & sender    , 
+                             int & receiver  , 
+                             char message [],
+                             char retValue[], 
+                             char length = 0 );
         
         static bool encode ( BENDataPackage* package, char retValue[] );
         
@@ -34,7 +34,7 @@ namespace BEN {
 
         static char checkSum ( char message[], char messageLength );
 
-        bool encode();
+        bool encode(); 
     };
 }
 
