@@ -4,7 +4,6 @@
  
   This example code is in the public domain.
  */
-
 #include <avr/wdt.h>        // Supplied Watch Dog Timer Macros 
 #include <avr/sleep.h>      // Supplied AVR Sleep Macros
 
