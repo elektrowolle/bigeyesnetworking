@@ -14,6 +14,7 @@
 #define RECEIVING_MESSAGE_LENGTH   0x20
 #define RECEIVING_MESSAGE          0x40
 #define CHECKSUMS_ARE_CORRECT      0x80
+#define NULL                       0
 #endif 
 
 
@@ -28,6 +29,66 @@ namespace BEN {
 
 	    return byteToCheck != PREFIX & (0xff << 8 - length);
 	}
+
+	//
+	//  Pretty Simple  Generic LinkedList. Steal it!
+	//
+
+	template <typename Type> class List {
+	public:
+		Type  value;
+		List* previousItem;
+		List* nextItem;
+		List ( Type value ) {
+			List (value, NULL);
+		}
+
+
+
+		List ( Type value, List *previous ) {
+			this->set (value);
+			this->nextItem = NULL;
+		}
+
+		~List (  ) {
+			if(nextItem != NULL)
+				delete nextItem;
+		}
+
+		List* add ( Type value ) {
+			if (next() == NULL) {
+				return this->nextItem = new List ( value, this );
+			}else {
+				return next()->add(value); 
+			}
+			
+		}
+
+		void remove (  ) {
+			this->previous->nextItem = this->nextItem;
+			this->next->previousItem = this->previousItem;
+			this->previousItem = NULL;
+			this->nextItem     = NULL;
+
+			delete this;
+		}
+
+		List* next (  ) {
+			return nextItem;
+		}
+
+		List* previous (  ) {
+			return previousItem;
+		}
+
+		Type get (  ) {
+			return value;
+		}
+
+		void set (Type value) {
+			this->value = value;
+		}
+	};
 }
 
 #endif // ___UTILITY_H___

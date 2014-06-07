@@ -81,20 +81,20 @@ namespace BEN {
 
 
         this->receivedBitBuffer += (this->receivedBitBuffer ? 1 : 0) << 7 - this->receivedBitBuffer;
-        this->receivedBitBuffer++;
+        this->receivedBitBufferPosition ++;
 
         if (
-            (this->STATES | RECEIVED_PREFIX) == 0 
-            && !BEN::isPrefix(this->receivedBitBuffer, this->receivedBitBuffer)) {
+            (this->STATES & RECEIVED_PREFIX) == 0 
+            && !BEN::isPrefix(this->receivedBitBuffer, this->receivedBitBufferPosition)) {
             
             this->resetBitBuffer();
 
-        } else if (receivedBitBuffer > 7){
+        } else if (receivedBitBufferPosition > 7){
             this->STATES |= RECEIVED_PREFIX;
             this->resetBitBuffer();
         }
         
-        if (receivedBitBuffer > 7) {
+        if (receivedBitBufferPosition > 7) {
             this->listen(receivedBitBuffer);
             this->resetBitBuffer();
         }
@@ -112,6 +112,7 @@ namespace BEN {
 
         } else if ((STATES & RECEIVED_PREFIX) != 0){
             availableData = new BENDataPackage ();
+            //availableData->
         }
     }
 

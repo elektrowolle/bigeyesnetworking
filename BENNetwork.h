@@ -64,7 +64,10 @@ namespace BEN {
 
         BENDataPackage* availableData;
         
-        //FLAGS
+        char messageLength;
+        char STATES;
+
+        // STATES
 
         //  [0000 0000]
         //   |||| |||\___{  1} DATA_AVAILABLE
@@ -75,10 +78,6 @@ namespace BEN {
         //   ||\_________{ 32} RECEIVING_MESSAGE_LENGTH
         //   |\__________{ 64} RECEIVING_MESSAGE
         //   \___________{128} CHECKSUMS_ARE_CORRECT
-
-        
-        char messageLength;
-        char STATES;
 
         void  (*intFunc) (void);
 

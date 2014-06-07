@@ -8,7 +8,11 @@ namespace BEN {
         int  sender           ;
         int  receiver         ;
         char message        [];
-        //char 
+
+        //
+        //  CONTRUCTOR
+        //
+
         BENDataPackage ( int   sender    , 
                          int   receiver  , 
                          char  message [], 
@@ -19,11 +23,31 @@ namespace BEN {
 
         BENDataPackage (  );
 
+        //
+        //  Properties
+        //
+
+        void setSender   (  );
+        void setReceiver (  );
+        void setMessage  (  );
+
+        int  getSender   (  );
+        int  getReceiver (  );
+        void getMessage ( char message[] );
+
+        //
+        //  Methods
+        //
+        
+
+        //
+        //  Utilities
+        //
         static bool encode ( int & sender    , 
                              int & receiver  , 
-                             char message [],
-                             char retValue[], 
-                             char length = 0 );
+                             char  message [],
+                             char  retValue[], 
+                             char  length = 0 );
         
         static bool encode ( BENDataPackage* package, char retValue[] );
         

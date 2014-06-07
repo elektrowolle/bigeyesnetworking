@@ -1,15 +1,16 @@
 #ifndef ___BENClass_h___
 #define ___BENClass_h___
 
-#include <inttypes.h>
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <avr/pgmspace.h>
-#include <stdio.h>
+// #include <inttypes.h>
+// #include <avr/io.h>
+// #include <avr/interrupt.h>
+// #include <avr/pgmspace.h>
+// #include <stdio.h>
 
 #include "Utility.hpp"
 #include "BENDataPackage.h"
 #include "BENNetwork.h"
+#include <vector>
 
 
 namespace BEN {
@@ -22,7 +23,8 @@ namespace BEN {
         bool RECEIVING     ;
 
         //VARIABLES
-        BENNetwork* network [ IO_PINS ];
+        List<BENNetwork*>* network;
+        //BENNetwork* network [ IO_PINS ];
         
         //FUNCTIONS
         BENClass     (   );
@@ -31,8 +33,8 @@ namespace BEN {
         
 
 
-        void attach  ( int pin, BENNetwork *network );
-        void trigger ( int pin );
+        void attach  (BENNetwork *network );
+        void trigger ();
 
         
         

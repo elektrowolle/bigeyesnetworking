@@ -5,24 +5,34 @@
 namespace BEN {
 
 	void BENClass::init () {
-
+		network = NULL;
 	}
 
 	void BENClass::enable() {
 	    ENABLED = true;
 	}
 
-	void BENClass::trigger(int pin) {
-	    network[pin]->trigger();
+	void BENClass::trigger() {
+		List<BENNetwork*>* nextItem = network;
+	    while(nextItem != NULL) {
+	    	nextItem->get()->trigger();
+	    	nextItem = nextItem->next();
+	    }
 	}
 
-	void BENClass::attach(int pin, BENNetwork *newNetwork) {
-	    network[pin] = newNetwork;
+	void BENClass::attach(BENNetwork *newNetwork) {
+		if (network != NULL) {
+			network = new List<BENNetwork*> (newNetwork);
+
+		}else{
+			network->add(newNetwork);
+		}
 	}
 
 	BENClass::BENClass() {
-	    INITIALISED    = false;
-	    RECEIVING      = false;
+	    this->INITIALISED = false;
+	    this->RECEIVING   = false;
+	    //this->network     = new std::vector<BENNetwork> (16);
 	}
 
 	BENClass bc;
