@@ -32,10 +32,12 @@ namespace BEN {
 	BENClass::BENClass() {
 	    this->INITIALISED = false;
 	    this->RECEIVING   = false;
-	    //this->network     = new std::vector<BENNetwork> (16);
+	    this->network     = NULL;
+	    this->ENABLED     = true;
 	}
 
-	BENClass bc;
+	BENClass * bc = new BENClass();
 
 }
+
 

@@ -1,16 +1,9 @@
 #ifndef ___BENClass_h___
 #define ___BENClass_h___
 
-// #include <inttypes.h>
-// #include <avr/io.h>
-// #include <avr/interrupt.h>
-// #include <avr/pgmspace.h>
-// #include <stdio.h>
-
 #include "Utility.hpp"
 #include "BENDataPackage.h"
 #include "BENNetwork.h"
-#include <vector>
 
 
 namespace BEN {
@@ -41,8 +34,11 @@ namespace BEN {
 
     };
 
-    extern BENClass bc;
+    extern BENClass * bc;
+
 }
+
+
 
 //using BEN;
 

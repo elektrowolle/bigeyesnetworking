@@ -48,6 +48,7 @@ namespace BEN {
     //   8: 147-155 MSG   '!' [00010001]
     //   8: 156-164 CHECK     [00010001]
     //
+    //  By the way. mod ffh isn't needed in a byte.
 
     class BENDataPackage;
 
@@ -69,20 +70,38 @@ namespace BEN {
 
         // STATES
 
+        //////  OUTDATED ///////////
         //  [0000 0000]
-        //   |||| |||\___{  1} DATA_AVAILABLE
+        //   |||| |||\___{  1} IN_PROGRESS
         //   |||| ||\____{  2} TRIGGER_ACTIVE
         //   |||| |\_____{  4} RECEIVED_PREFIX
         //   |||| \______{  8} LISTEN_TO_SENDER_ADDRESS
         //   |||\________{ 16} LISTEN_TO_RECIVER_ADDRESS
         //   ||\_________{ 32} RECEIVING_MESSAGE_LENGTH
         //   |\__________{ 64} RECEIVING_MESSAGE
-        //   \___________{128} CHECKSUMS_ARE_CORRECT
+        //   \___________{128} CHECKSUMS_ARE_INCORRECT
+        //////  \OUTDATED ///////////
+
+        //  [0000 0000]
+        //   |||| |||\___{  1} (ACTIVITY_)IN_PROGRESS
+        //   |||| ||\____{  2} TRIGGER_ACTIVE
+        //   |||| ||              
+        //   |||| |\_____ }                    {  4} RECEIVING_PREFIX          
+        //   |||| \______ }    Activity Bits   {  8} LISTEN_TO_SENDER_ADDRESS
+        //   |||\________ }                    { 12} LISTEN_TO_RECIVER_ADDRESS
+        //   |||                               { 16} RECEIVING_MESSAGE_LENGTH
+        //   |||                               { 20} RECEIVING_MESSAGE
+        //   |||                               { 24} RESERVED (NO FUNCTION)
+        //   |||                               { 28} RESERVED (NO FUNCTION)
+        //   |||                               
+        //   |||
+        //   ||\_________{ 32} DATA_READY
+        //   |\__________{ 64} ABORTED
+        //   \___________{128} CHECKSUMS_ARE_INCORRECT
 
         void  (*intFunc) (void);
 
-        BENNetwork          ( int pin, int address, void (*) (void) );
-        BENNetwork          ( int pin, int address );
+        BENNetwork          ( int pin, int address, void (*) (void) = NULL );
         ~BENNetwork         (  );
 
         bool send           ( int address, char *message[] );
@@ -92,9 +111,13 @@ namespace BEN {
         void listen         ( bool receivedBit  );
         void listen         ( char receivedByte );
         
-        void resetBitBuffer (  );
-        void resetFlags     (  );
-        void clearMessage   (  );
+        void resetBitBuffer  (  );
+        void resetFlags      (  );
+        void activateState   ( char stateByte );
+        void deactivateState ( char stateByte );
+        void changeActivity  ( char stateByte );
+        bool checkState      ( char stateByte );
+        void clearMessage    (  );
     };
 }
 
