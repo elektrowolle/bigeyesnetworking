@@ -54,7 +54,6 @@ namespace BEN {
 
     class BENNetwork {
     public:
-        int   PIN ;
         int   ADDRESS;
 
         char  *submissionBuffer [ BUFFERSIZE ];
@@ -101,7 +100,7 @@ namespace BEN {
 
         void  (*intFunc) (void);
 
-        BENNetwork          ( int pin, int address, void (*) (void) = NULL );
+        BENNetwork          ( int address = 0, void (*) (void) = NULL );
         ~BENNetwork         (  );
 
         bool send           ( int address, char *message[] );
@@ -116,9 +115,13 @@ namespace BEN {
         void activateState   ( char stateByte );
         void deactivateState ( char stateByte );
         void changeActivity  ( char stateByte );
+        bool checkActivity   ( char activity  );
         bool checkState      ( char stateByte );
         void clearMessage    (  );
-    };
+
+private:
+	void addToBitBuffer(bool receivedBit);
+};
 }
 
 #endif // ___BEN_H___

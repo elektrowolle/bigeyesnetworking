@@ -39,7 +39,7 @@ namespace BEN {
 
     void BENDataPackage::setSenderMSB(char value, bool clear) {
         this->sender &= clear ? 0 : 0x0F;
-        this->sender |= ((int)value) << 4;
+        this->sender |= ((int)value) << 8;
     }
 
     void BENDataPackage::setReceiver(int value) {
@@ -48,12 +48,12 @@ namespace BEN {
 
     void BENDataPackage::setReceiverLSB(char value, bool clear) {
         this->receiver &= clear ? 0 : 0xF0;
-        this->receiver |= 4;
+        this->receiver |= value;
     }
 
     void BENDataPackage::setReceiverMSB(char value, bool clear) {
         this->receiver &= clear ? 0 : 0x0F;
-        this->receiver |= ((int)value) << 4;
+        this->receiver |= ((int)value) << 8;
     }
     
     //Will remove message

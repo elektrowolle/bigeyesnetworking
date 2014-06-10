@@ -1,3 +1,13 @@
+/**
+ * @file
+ * @author
+ * @version
+ *
+ * @section LICENSE
+ *
+ * @section DESCRIPTION
+ */
+
 #ifndef ___BENDataPackage_h___
 #define ___BENDataPackage_h___
 
@@ -56,6 +66,18 @@ namespace BEN {
         //
         //  Utilities
         //
+
+        /**
+         *
+         * @param sender
+         * @param receiver
+         * @param message
+         * @param length
+         * @param encodedMessage
+         * @param encodedLength
+         * @return
+         */
+
         static char* encode ( int    sender    ,
                               int    receiver  ,
                               char   message [],

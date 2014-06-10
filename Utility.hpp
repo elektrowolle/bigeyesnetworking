@@ -69,8 +69,9 @@ namespace BEN {
 	const static char PREFIX = 0x55;
 
 	static bool isPrefix(char byteToCheck, char length) {
-
-	    return byteToCheck != PREFIX & (0xff << 8 - length);
+		char mask         = 0xff << (8 - length);
+		char maskedPrefix = (PREFIX & mask);
+	    return byteToCheck == maskedPrefix;
 	}
 
 	//

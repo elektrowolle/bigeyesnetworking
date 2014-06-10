@@ -3,13 +3,14 @@
 
 namespace BEN {
 
-    BENNetwork::BENNetwork(int pin, int address, void (*userFunc)(void)) {
+    BENNetwork::BENNetwork(int address, void (*userFunc)(void)) {
 
         this->ADDRESS = address;
-        this->PIN     = pin;
 
         this->clearMessage();
         this->intFunc = userFunc;
+        this->STATES  = DEFAULT_STATES;
+        this->availableData = new BENDataPackage();
     }
 
 
@@ -20,6 +21,12 @@ namespace BEN {
     void BENNetwork::trigger() {
         if(TRIGGER_ACTIVE) this->intFunc();
     }
+
+void BENNetwork::addToBitBuffer(bool receivedBit) {
+	this->receivedBitBuffer += (receivedBit ? 1 : 0)
+			<< (7 - this->receivedBitBufferPosition);
+	this->receivedBitBufferPosition ++;
+}
 
     void BENNetwork::listen(bool receivedBit) {
         
@@ -74,13 +81,21 @@ namespace BEN {
         //  
 
 
-        this->receivedBitBuffer += (this->receivedBitBuffer ? 1 : 0) << 7 - this->receivedBitBuffer;
-        this->receivedBitBufferPosition ++;
+        this->addToBitBuffer(receivedBit);
 
-        if (this->checkState(RECEIVING_PREFIX) && this->checkState(IN_PROGRESS)){
+        if (this->STATES == DEFAULT_STATES) {
+        	this->changeActivity(RECEIVING_PREFIX);
+        	this->activateState(IN_PROGRESS);
+
+        } else if (this->checkState(DATA_READY)) {
+			return ;
+		}
+
+        if (this->checkActivity(RECEIVING_PREFIX) && this->checkState(IN_PROGRESS)){
             
             if(!BEN::isPrefix(this->receivedBitBuffer, this->receivedBitBufferPosition)) {
                 this->resetBitBuffer();
+                this->addToBitBuffer(receivedBit);
 
             }else if (this->receivedBitBufferPosition > 7){
                 this->changeActivity (LISTEN_TO_SENDER_ADDRESS);
@@ -88,16 +103,14 @@ namespace BEN {
                 this->resetBitBuffer ();
             }
         }
-        
-        if (receivedBitBufferPosition > 7) {
+        if (this->receivedBitBufferPosition > 7) {
             this->listen(receivedBitBuffer);
             this->resetBitBuffer();
         }
     }
 
     void BENNetwork::listen(char receivedByte) {
-
-        if (this->checkState(RECEIVING_MESSAGE)) {
+        if (this->checkActivity(RECEIVING_MESSAGE)) {
             if(this->availableData->nextByteIsChechSum() 
                 && !this->availableData->checkSumIsValid(receivedByte)) {
                 this->activateState(CHECKSUMS_ARE_INCORRECT);
@@ -108,14 +121,16 @@ namespace BEN {
 
             if(this->availableData->bytesOfMessageReceived() >= this->availableData->getMessageLength()) {
                 this->deactivateState(IN_PROGRESS);
+                this->activateState  (DATA_READY );
             }
 
-        } else if (checkState(RECEIVING_MESSAGE_LENGTH)) {
+        } else if (checkActivity(RECEIVING_MESSAGE_LENGTH)) {
             this->availableData->setMessageLength(receivedByte);
 
-            this->activateState(IN_PROGRESS & RECEIVING_MESSAGE);
+            this->changeActivity(IN_PROGRESS      );
+            this->activateState (RECEIVING_MESSAGE);
 
-        } else if (this->checkState(LISTEN_TO_RECEIVER_ADDRESS)) {
+        } else if (this->checkActivity(LISTEN_TO_RECEIVER_ADDRESS)) {
             if(!this->checkState(IN_PROGRESS)){
                 this->availableData->setReceiverMSB(receivedByte);
                 
@@ -124,11 +139,11 @@ namespace BEN {
             } else {
                 this->availableData->setReceiverLSB(receivedByte);
                 
-                this->deactivateState(IN_PROGRESS);
-                this->activateState  (RECEIVING_MESSAGE_LENGTH);
+                this->deactivateState(IN_PROGRESS             );
+                this->changeActivity (RECEIVING_MESSAGE_LENGTH);
             } 
 
-        } else if (this->checkState(LISTEN_TO_SENDER_ADDRESS)) {
+        } else if (this->checkActivity(LISTEN_TO_SENDER_ADDRESS)) {
             if(!this->checkState(IN_PROGRESS)){
                 this->availableData->setSenderMSB(receivedByte);
                 
@@ -137,8 +152,8 @@ namespace BEN {
             } else {
                 this->availableData->setSenderLSB(receivedByte);
                 
-                this->deactivateState(IN_PROGRESS);
-                this->activateState  (LISTEN_TO_RECEIVER_ADDRESS);
+                this->deactivateState(IN_PROGRESS               );
+                this->changeActivity (LISTEN_TO_RECEIVER_ADDRESS);
             }
         }
         
@@ -162,40 +177,47 @@ namespace BEN {
     }
 
     void BENNetwork::changeActivity (char stateByte) {
-        // 
-        // EXAMPLE:
-        //   Current activity is RECEIVING_PREFIX. The Trigger is active as well.
-        //   The activity is going to be changed to RECEIVING_MESSAGE.
-        //
-        //   this->changeActivity(0x10);
-        //
-        // STATES   : [0000 0110]
-        // stateByte: [0001 0000]
-        //
-        // 01: STATES & ~ACTIVITY_MASK
-        //     [0000 0110]
-        //   &~[0001 1100]
-        //   =============
-        //     [0000 0010] result 1
-        // 
-        // 02: stateByte & ACTIVITY_MASK
-        //     [0001 0000]
-        //   & [0001 1100]
-        //   =============
-        //     [0001 0000] result 2
-        //
-        // 03: result1 | result 2
-        //     [0000 0010]
-        //   | [0001 0000]
-        //   =============
-        //     [0001 0010]
-        //
+        /**
+         *  //
+			// EXAMPLE:
+			//   Current activity is RECEIVING_PREFIX. The Trigger is active as well.
+			//   The activity is going to be changed to RECEIVING_MESSAGE.
+			//
+			//   this->changeActivity(0x10);
+			//
+			// STATES   : [0000 0110]
+			// stateByte: [0001 0000]
+			//
+			// 01: STATES & ~ACTIVITY_MASK
+			//     [0000 0110]
+			//   &~[1110 0011]
+			//   =============
+			//     [0000 0010] result 1
+			//
+			// 02: stateByte & ACTIVITY_MASK
+			//     [0001 0000]
+			//   & [0001 1100]
+			//   =============
+			//     [0001 0000] result 2
+			//
+			// 03: result1 | result 2
+			//     [0000 0010]
+			//   | [0001 0000]
+			//   =============
+			//     [0001 0010]
+			//
+		*
+		*/
 
         this->STATES = (this->STATES & ~ACTIVITY_MASK) | (stateByte & ACTIVITY_MASK);
     }
 
+    bool BENNetwork::checkActivity(char activity) {
+    	return (this->STATES & ACTIVITY_MASK) == activity;
+    }
+
     bool BENNetwork::checkState(char stateByte) {
-        return this->STATES & stateByte != 0;
+        return (this->STATES & stateByte) != 0;
     }
 
     void BENNetwork::clearMessage() {
