@@ -2,7 +2,7 @@
 
 void setup()
 {
-	BEN::bc.init();
+	BEN::bc->init();
 }
 
 void loop()

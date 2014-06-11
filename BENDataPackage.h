@@ -45,17 +45,17 @@ namespace BEN {
         void setReceiverMSB   ( char  value, bool clear = false );
         void setMessageLength ( char  value, bool resetMessage = false );
         
-        void setMessage             ( char value [], char length      );
-        bool addToMessage           ( char  value                     );
-        char bytesOfMessageReceived ( bool includingCheckSums = false );
+        void setMessage             ( char value [], char length                       );
+        bool addToMessage           ( char  value                                      );
+        char bytesOfMessageReceived ( bool includingCheckSums = false                  );
         bool nextByteIsChechSum     (  );
-        bool checkSumIsValid        ( char  value                     );
+        bool checkSumIsValid        ( char  value, bool increaseMessagePositionCounter );
 
-        int    getSender         (  );
-        int    getReceiver       (  );
-        char* getMessage         (  );
-        char   getMessageLength  ( bool includingCheckSums = false );
-        char* getEncodedMessage  (  );
+        int   getSender         (  );
+        int   getReceiver       (  );
+        char* getMessage        (  );
+        char  getMessageLength  ( bool includingCheckSums = false );
+        char* getEncodedMessage (  );
 
         //
         //  Methods

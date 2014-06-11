@@ -112,7 +112,7 @@ void BENNetwork::addToBitBuffer(bool receivedBit) {
     void BENNetwork::listen(char receivedByte) {
         if (this->checkActivity(RECEIVING_MESSAGE)) {
             if(this->availableData->nextByteIsChechSum() 
-                && !this->availableData->checkSumIsValid(receivedByte)) {
+                && !this->availableData->checkSumIsValid(receivedByte, true)) {
                 this->activateState(CHECKSUMS_ARE_INCORRECT);
 
             } else {
@@ -125,10 +125,10 @@ void BENNetwork::addToBitBuffer(bool receivedBit) {
             }
 
         } else if (checkActivity(RECEIVING_MESSAGE_LENGTH)) {
-            this->availableData->setMessageLength(receivedByte);
+            this->availableData->setMessageLength(receivedByte, true);
 
-            this->changeActivity(IN_PROGRESS      );
-            this->activateState (RECEIVING_MESSAGE);
+            this->changeActivity(RECEIVING_MESSAGE);
+            this->activateState (IN_PROGRESS      );
 
         } else if (this->checkActivity(LISTEN_TO_RECEIVER_ADDRESS)) {
             if(!this->checkState(IN_PROGRESS)){

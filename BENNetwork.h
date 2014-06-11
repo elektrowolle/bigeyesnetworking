@@ -34,7 +34,7 @@ namespace BEN {
     //           device (A9)
     //  
     //   8: 000-008 PREFIX    [01010101]
-    //   8: 009-041 SENDER    [ 00  01h]
+    //  16: 009-041 SENDER    [ 00  01h]
     //  16: 042-074 RECEIVER  [ 00  A9h]
     //  16: 075-083 LENGTH OF [00000110]
     //      MESSAGE (bytes)   

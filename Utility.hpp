@@ -58,6 +58,8 @@
 #define ABORTED                    0x40
 #define CHECKSUMS_ARE_INCORRECT    0x80
 
+#define FIRST_CHECKSUM             0x01
+#define CHECKSUM_PERIOD            0x04
 #define NULL                       0x00
 #endif 
 
