@@ -25,7 +25,7 @@ namespace BEN {
 			network = new List<BENNetwork*> (newNetwork);
 
 		}else{
-			network->add(newNetwork);
+			network->push(newNetwork);
 		}
 	}
 

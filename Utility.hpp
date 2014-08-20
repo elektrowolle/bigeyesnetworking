@@ -40,6 +40,9 @@
 #define DEFAULT_STATES             0x00
 #define ACTIVITY_MASK              0x1C
 
+/////////////
+//FLAGS
+
 //NETWORK
 #define IN_PROGRESS                0x01
 #define TRIGGER_ACTIVE             0x02
@@ -58,8 +61,15 @@
 #define ABORTED                    0x40
 #define CHECKSUMS_ARE_INCORRECT    0x80
 
-#define FIRST_CHECKSUM             0x01
-#define CHECKSUM_PERIOD            0x04
+//\FLAGS
+/////////////
+
+//DATA PACKAGE PROPERTIES
+#define OVERHEAD_CHECKSUM_OFFSET  0x01
+#define CHECKSUM_PERIOD            0x06
+#define OVERHEAD                   0x06
+
+
 #define NULL                       0x00
 #endif 
 
@@ -97,15 +107,26 @@ namespace BEN {
 				delete nextItem;
 		}
 
-		List* add ( Type value ) {
+		List* push ( Type value ) {
 			if (next() == NULL) {
-				return this->nextItem = new List ( value, this );
+				return this->nextItem = new List<Type> ( value, this );
 			}else {
-				return next()->add(value); 
+				return next()->push(value); 
 			}
 			
 		}
-
+		
+		Type pop(){
+			Type value;
+			if (next() == NULL) {
+				value = this->value;
+				this->remove();
+			}else {
+				value = next()->pop();
+			}
+			return value;
+		}
+		
 		void remove (  ) {
 			this->previous->nextItem = this->nextItem;
 			this->next->previousItem = this->previousItem;

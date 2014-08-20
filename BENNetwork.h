@@ -1,17 +1,10 @@
 #ifndef ___BEN_H___
 #define ___BEN_H___
 
-#include "Utility.hpp"
 #include "BENDataPackage.h"
+#include "Utility.hpp"
 
 namespace BEN {
-    //class BENClass;
-
-    //#include "BENDataPackage.h"
-
-
-
-
     //  Let`s do a time modulated slow but always everywhere available 
     //  network protocol!
     //       signal
@@ -39,14 +32,12 @@ namespace BEN {
     //  16: 075-083 LENGTH OF [00000110]
     //      MESSAGE (bytes)   
     //   8: 084-092 MSG   'H' [01001000]
-    //   8: 093-101 CHECK     [11111000] ((00h+01h+00h+A9h+06h+48h) mod ffh = F8h)
     //   8: 102-110 MSG   'e' [01100101]
     //   8: 111-119 MSG   'l' [01101100]
     //   8: 120-128 MSG   'l' [01101100]
     //   8: 129-137 MSG   'o' [01101111]
-    //   8: 138-146 CHECK     [10101101] ((65h+6Ch+6Ch+6Fh) mod ffh = ADh)
     //   8: 147-155 MSG   '!' [00010001]
-    //   8: 156-164 CHECK     [00010001]
+    //   8: 156-164 CHECK     [00010001]  # Sum(SENDER,RECEIVER,LOM,MSG) % 255
     //
     //  By the way. mod ffh isn't needed in a byte.
 
@@ -54,7 +45,7 @@ namespace BEN {
 
     class BENNetwork {
     public:
-        int   ADDRESS;
+        int   LOCAL_ADDRESS;
 
         char  *submissionBuffer [ BUFFERSIZE ];
         char  *receiverBuffer   [];
@@ -65,8 +56,8 @@ namespace BEN {
         BENDataPackage* availableData;
         
         char messageLength;
-        char STATES;
 
+        char STATES;
         // STATES
 
         //////  OUTDATED ///////////
@@ -78,7 +69,7 @@ namespace BEN {
         //   |||\________{ 16} LISTEN_TO_RECIVER_ADDRESS
         //   ||\_________{ 32} RECEIVING_MESSAGE_LENGTH
         //   |\__________{ 64} RECEIVING_MESSAGE
-        //   \___________{128} CHECKSUMS_ARE_INCORRECT
+        //   \___________{128} CHECKSUM_IS_INCORRECT
         //////  \OUTDATED ///////////
 
         //  [0000 0000]
@@ -96,7 +87,7 @@ namespace BEN {
         //   |||
         //   ||\_________{ 32} DATA_READY
         //   |\__________{ 64} ABORTED
-        //   \___________{128} CHECKSUMS_ARE_INCORRECT
+        //   \___________{128} CHECKSUMS_IS_INCORRECT
 
         void  (*intFunc) (void);
 
@@ -120,7 +111,12 @@ namespace BEN {
         void clearMessage    (  );
 
 private:
-	void addToBitBuffer(bool receivedBit);
+	void addToBitBuffer          ( bool receivedBit  );
+	void listenToReceiverAddress ( char receivedByte );
+	void listenToMessageLength   ( char receivedByte );
+	void listenToSenderAddress   ( char receivedByte );
+	void listenToMessage         ( char receivedByte );
+	void lsitenToPrefix          ( bool receivedBit  );
 };
 }
 

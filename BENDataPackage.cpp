@@ -20,7 +20,7 @@ namespace BEN {
 
 
 
-        this->setMessageLength(length == 0 ? message == NULL ? 0 : sizeof message : length);
+        this->setMessageLength(length > 0 ? length : 0);
 
     }
     
@@ -61,16 +61,11 @@ namespace BEN {
         if(resetMessage && value > 0) {
             delete this->message;
             this->setMessage(new char[value], value);
-
-            //char a[5]
-            //a == a[0]
-            //*(a+1) == a[1]
-            //*(a+i) == a[i]
-
             this->messagePosition = 0;
         }
         
         this->messageLength = value > 0 ? value : 0;
+        this->encodedLength = getMessageLength(true);
         
     }
 
@@ -93,55 +88,93 @@ namespace BEN {
     }
 
     char BENDataPackage::bytesOfMessageReceived(bool includingCheckSums) {
-    	if (includingCheckSums) {
+    	//if (includingCheckSums) {
     		return this->messagePosition;
-		} else {
-			return this->messagePosition - (this->messagePosition > FIRST_CHECKSUM ? 1 : 0) - ((this->messagePosition + FIRST_CHECKSUM) / CHECKSUM_PERIOD);
-		}
+		//} else {
+//
+	    	//char _checksums  = (this->messagePosition - OVERHEAD_CHECKSUM_OFFSET) / (CHECKSUM_PERIOD + 1);
+	    	//if (this->messagePosition > OVERHEAD_CHECKSUM_OFFSET) {
+				//++_checksums;
+			//}
+			//return this->messagePosition - _checksums;
+		//}
     }
 
-    bool BENDataPackage::nextByteIsChechSum() {
-    	return this->bytesOfMessageReceived(true) == FIRST_CHECKSUM ||
-    		  (this->bytesOfMessageReceived(true) + FIRST_CHECKSUM) % CHECKSUM_PERIOD == 0;
-    }
 
-    bool BENDataPackage::checkSumIsValid(char value, bool increaseMessagePositionCounter) {
-    	bool _ret = true;
+	/************************************************************************/
+	/* This checksum related stuff turned out to be a major trouble maker   */
+	/*  it's gonna be super simplified                                      */
+	/************************************************************************/
+	
+    //bool BENDataPackage::nextByteIsChechSum() {
+    	//char _bytesOfMessageWithChecksum    = bytesOfMessageReceived(true);
+    	//char _bytesOfMessageWithoutChecksum = bytesOfMessageReceived(false);
+//
+    	//char _calculated = _bytesOfMessageWithChecksum - OVERHEARD_CHECKSUM_OFFSET;// - _checksums;
+//
+    	//return _bytesOfMessageWithChecksum == OVERHEARD_CHECKSUM_OFFSET
+			//|| (_bytesOfMessageWithChecksum > 0 && _calculated > 0
+					//&& (_calculated) % (CHECKSUM_PERIOD) == 0)
+    		//||  _bytesOfMessageWithoutChecksum  == this->messageLength;
+    //}
+//
+	//bool BENDataPackage::checkFirstByteChecksum(bool _ret, char value) {
+		//char _checkSum = 0;
+		//char _senderMSB = (this->getSender() >> 8) & 0xFF;
+		//char _senderLSB = this->getSender() & 0xFF;
+		//char _receiverMSB = (this->getReceiver() >> 8) & 0xFF;
+		//char _receiverLSB = this->getReceiver() & 0xFF;
+//
+		//_checkSum += _senderMSB + _senderLSB;
+		//_checkSum += _receiverMSB + _receiverLSB;
+		//_checkSum += this->getMessageLength();
+		//_checkSum += checkSum(this->message, OVERHEARD_CHECKSUM_OFFSET, 0);
+		//_ret = _checkSum == value;
+//
+		//return _ret;
+	//}
+	//
+	//
+    //bool BENDataPackage::checksumIsValid(char value) {
+    	//bool _ret = true;
+		//char _bytesOfMessageWithChecksum    = bytesOfMessageReceived(true);
+		//char _bytesOfMessageWithoutChecksum = bytesOfMessageReceived(false);
+//
+		//bool _lastByteOfMessage = _bytesOfMessageWithoutChecksum == this->messageLength;
+//
+		//if (_bytesOfMessageWithChecksum == OVERHEARD_CHECKSUM_OFFSET) {
+			//_ret = checkFirstByteChecksum(_ret, value);
+		//} else if (nextByteIsChechSum() && !_lastByteOfMessage) {
+			//char _checkSum   = 0;
+//
+			//char _startByte = _bytesOfMessageWithoutChecksum
+							   //- CHECKSUM_PERIOD
+							   //+ OVERHEARD_CHECKSUM_OFFSET;
+//
+			//_checkSum = BENDataPackage::checkSum(this->message,
+												 //_bytesOfMessageWithoutChecksum,
+												 //_startByte);
+//
+			//_ret = _checkSum == value;
+//
+		//} else if (_lastByteOfMessage) {
+			//char _checkSum      = 0;
+			//char _length        = messagePosition / CHECKSUM_PERIOD;
+			//char _startPosition = messagePosition - _length;
+//
+			//_checkSum = BENDataPackage::checkSum(this->message, _length, _startPosition);
+//
+			//_ret = _checkSum == value;
+		//}
+//
+    	//return _ret;
+    //}
 
-    	if (bytesOfMessageReceived(true) == FIRST_CHECKSUM) {
-    		char _checkSum = 0;
-    		char _max = FIRST_CHECKSUM;
-    		_checkSum += ((char) this->getSender  () << 8) + ((char) this->getSender  () & 0xFF);
-    		_checkSum += ((char) this->getReceiver() << 8) + ((char) this->getReceiver() & 0xFF);
-    		_checkSum += this->getMessageLength();
-
-    		_checkSum += checkSum(this->message, FIRST_CHECKSUM, 0);
-
-    		_ret = _checkSum == value;
-
-		} else if ((bytesOfMessageReceived(true) + FIRST_CHECKSUM) % CHECKSUM_PERIOD == 0) {
-			char _checkSum = 0;
-			_checkSum = BENDataPackage::checkSum(this->message, CHECKSUM_PERIOD, messagePosition - CHECKSUM_PERIOD);
-
-			_ret = _checkSum == value;
-
-		} else if (bytesOfMessageReceived(true) == this->messageLength) {
-			char _checkSum      = 0;
-			char _length        = messagePosition / CHECKSUM_PERIOD;
-			char _startPosition = messagePosition - _length;
-
-			_checkSum = BENDataPackage::checkSum(this->message, _length, _startPosition);
-
-			_ret = _checkSum == value;
-		}
-
-    	if (increaseMessagePositionCounter) {
-    		messagePosition++;
-		}
-
-    	return _ret;
-    }
-
+    
+	bool BENDataPackage::checksumIsValid(char value) {
+		return value == BENDataPackage::checkSum(getSender(), getReceiver(), this->messageLength, this->message);
+	}
+	
     int  BENDataPackage::getSender() {
     	return this->sender;
     }
@@ -181,8 +214,15 @@ namespace BEN {
                                  char** encodedMessage   ,
                                  char*  encodedLength    ) {
         
-        char _length    = length > 0 ? length : sizeof message;
-        char _retLength = calculateEncodedLength(_length);
+        char _length    = length > 0
+        			    ? length
+        				: sizeof message; // This is pretty stupid.
+
+        char _retLength = *encodedLength > 0
+        					? *encodedLength
+        					: calculateEncodedLength(_length);
+
+        char _checkSums  = 1;
 
         *encodedLength = _retLength;
 
@@ -190,28 +230,40 @@ namespace BEN {
 
         *encodedMessage = _retValue;
 
-        _retValue[0] = 0x55;                  //PREFIX
-        _retValue[1] = (char) sender   >> 8;  //MSB sender address
-        _retValue[2] = (char) sender;         //LSB sender address
-        _retValue[3] = (char) receiver >> 8;  //MSB receiver address
-        _retValue[4] = (char) receiver;       //MSB receiver address
-        _retValue[5] = _length;               //Length of Message
+        createOverhead(_retValue, sender, receiver, _length);
+        
 
-        for (int _i = 6, _j = 0; _i < _retLength; ++_i) {
-            if(_i == 6 + FIRST_CHECKSUM){
-                _retValue[_i]  = BENDataPackage::checkSum(_retValue, _i);
+        for (int _i = OVERHEAD, _j = 0; _i < _retLength - 1; ++_i) {
+            //if(_i == OVERHEAD + OVERHEAD_CHECKSUM_OFFSET){
+                //_retValue[_i]  = BENDataPackage::checkSum(_retValue, _i, 1);
+//
+            //} else if((_i - OVERHEAD_CHECKSUM_OFFSET - OVERHEAD) % (CHECKSUM_PERIOD) == 0) {
+                //_retValue[_i] = BENDataPackage::checkSum(_retValue, _i, _i - CHECKSUM_PERIOD + 1);
 
-            } else if(_i + FIRST_CHECKSUM % CHECKSUM_PERIOD == 0) {
-                _retValue[_i] = BENDataPackage::checkSum(_retValue, CHECKSUM_PERIOD, _i - CHECKSUM_PERIOD);
+            //} else if (_i == _retLength - 1) {
+            	//_retValue[_i] = BENDataPackage::checkSum(_retValue, _i, _i - (_i - OVERHEAD_CHECKSUM_OFFSET - OVERHEAD) % (CHECKSUM_PERIOD + 1));
 
-            } else {
+			//} else {
                 _retValue[_i] = message[_j];
                 _j++;
 
-            }
+            //}
         }
+		
+		_retValue [_retLength - 1] = BENDataPackage::checkSum(sender, receiver, _retLength, message);
+		
         return _retValue;
     }
+	
+	void BENDataPackage::createOverhead(char * _retValue, int sender, int receiver, char _length)
+	{
+		_retValue[0] = PREFIX         ;       //PREFIX
+		_retValue[1] = sender   >> 8  ;       //MSB sender address
+		_retValue[2] = (char) sender  ;       //LSB sender address
+		_retValue[3] = receiver >> 8  ;       //MSB receiver address
+		_retValue[4] = (char) receiver;       //MSB receiver address
+		_retValue[5] = _length        ;       //Length of Message
+	}
 
     void BENDataPackage::encode(BENDataPackage* package) {
         BENDataPackage::encode( package->sender       ,
@@ -226,26 +278,35 @@ namespace BEN {
 
     }
 
-    char BENDataPackage::calculateEncodedLength(char messageLength) {
-        char _retLength = messageLength + 6;
-        char _checks = 0;
-        _checks  = (messageLength > FIRST_CHECKSUM ? 1 : 0) + (messageLength + FIRST_CHECKSUM) / CHECKSUM_PERIOD;
-        _checks += (messageLength + FIRST_CHECKSUM) % CHECKSUM_PERIOD != 0 ? 1 : 0; //Check at the end of the package if there is no check already
+	//char BENDataPackage::getNumberOfCheckSums(char messageLength) {
+		//char _checkSums = 0;
+		//_checkSums = (messageLength > OVERHEARD_CHECKSUM_OFFSET ? 1 : 0)
+				//+ (messageLength + OVERHEARD_CHECKSUM_OFFSET) / CHECKSUM_PERIOD;
+		//_checkSums +=
+				//(messageLength + OVERHEARD_CHECKSUM_OFFSET) % CHECKSUM_PERIOD != 0 ? 1 : 0;
+		//return _checkSums;
+	//}
 
-        _retLength += _checks;
+    char BENDataPackage::calculateEncodedLength(char messageLength) {
+        char _retLength = messageLength + OVERHEAD;
+        //char _checkSums = getNumberOfCheckSums(messageLength);
+        _retLength += 1;
 
         return _retLength;
     }
 
-    char BENDataPackage::checkSum(char message[], char messageLength, char startWithByte) {
-        char _length = messageLength > 0 ? messageLength : sizeof message;
+    char BENDataPackage::checkSum(int sender, int receiver, char messageLength, char message[]) {
         char _sum    = 0;
         
-        for (int _i = startWithByte; _i < _length; ++_i)
+		_sum += sender;
+		_sum += receiver;
+		_sum += messageLength;
+		
+        for (int _i = 0; _i < messageLength; ++_i)
         {
             _sum += message[_i];
         }
 
-        return _sum % 0xff;
+        return _sum;
     }
 }
