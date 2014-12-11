@@ -17,21 +17,13 @@ namespace BEN {
 
         //VARIABLES
         List<BENNetwork*>* network;
-        //BENNetwork* network [ IO_PINS ];
-        
+                
         //FUNCTIONS
         BENClass     (   );
         void init    (   );
         void enable  (   );
-        
-
 
         void attach  (BENNetwork *network );
-        void trigger ();
-
-        
-        
-
     };
 
     extern BENClass * bc;

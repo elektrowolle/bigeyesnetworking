@@ -41,83 +41,88 @@ namespace BEN {
     //
     //  By the way. mod ffh isn't needed in a byte.
 
-    class BENDataPackage;
+    //class BENDataPackage;
 
-    class BENNetwork {
-    public:
-        int   LOCAL_ADDRESS;
+    
 
-        char  *submissionBuffer [ BUFFERSIZE ];
-        char  *receiverBuffer   [];
+  class BENNetwork {
+  public:
+      int   LOCAL_ADDRESS;
 
-        char  receivedBitBuffer;
-        char  receivedBitBufferPosition;
+      char  *submissionBuffer [ BUFFERSIZE ];
+      char  *receiverBuffer   [];
 
-        BENDataPackage* availableData;
-        
-        char messageLength;
+      char  receivedBitBuffer;
+      char  receivedBitBufferPosition;
 
-        char STATES;
-        // STATES
+      BENDataPackage* availableData;
+      
+      char messageLength;
 
-        //////  OUTDATED ///////////
-        //  [0000 0000]
-        //   |||| |||\___{  1} IN_PROGRESS
-        //   |||| ||\____{  2} TRIGGER_ACTIVE
-        //   |||| |\_____{  4} RECEIVED_PREFIX
-        //   |||| \______{  8} LISTEN_TO_SENDER_ADDRESS
-        //   |||\________{ 16} LISTEN_TO_RECIVER_ADDRESS
-        //   ||\_________{ 32} RECEIVING_MESSAGE_LENGTH
-        //   |\__________{ 64} RECEIVING_MESSAGE
-        //   \___________{128} CHECKSUM_IS_INCORRECT
-        //////  \OUTDATED ///////////
+      char STATES;
+      // STATES
 
-        //  [0000 0000]
-        //   |||| |||\___{  1} (ACTIVITY_)IN_PROGRESS
-        //   |||| ||\____{  2} TRIGGER_ACTIVE
-        //   |||| ||              
-        //   |||| |\_____ }                    {  4} RECEIVING_PREFIX          
-        //   |||| \______ }    Activity Bits   {  8} LISTEN_TO_SENDER_ADDRESS
-        //   |||\________ }                    { 12} LISTEN_TO_RECIVER_ADDRESS
-        //   |||                               { 16} RECEIVING_MESSAGE_LENGTH
-        //   |||                               { 20} RECEIVING_MESSAGE
-        //   |||                               { 24} RESERVED (NO FUNCTION)
-        //   |||                               { 28} RESERVED (NO FUNCTION)
-        //   |||                               
-        //   |||
-        //   ||\_________{ 32} DATA_READY
-        //   |\__________{ 64} ABORTED
-        //   \___________{128} CHECKSUMS_IS_INCORRECT
+      //////  OUTDATED ///////////
+      //  [0000 0000]
+      //   |||| |||\___{  1} IN_PROGRESS
+      //   |||| ||\____{  2} TRIGGER_ACTIVE
+      //   |||| |\_____{  4} RECEIVED_PREFIX
+      //   |||| \______{  8} LISTEN_TO_SENDER_ADDRESS
+      //   |||\________{ 16} LISTEN_TO_RECIVER_ADDRESS
+      //   ||\_________{ 32} RECEIVING_MESSAGE_LENGTH
+      //   |\__________{ 64} RECEIVING_MESSAGE
+      //   \___________{128} CHECKSUM_IS_INCORRECT
+      //////  \OUTDATED ///////////
 
-        void  (*intFunc) (void);
+      //  [0000 0000]
+      //   |||| |||\___{  1} (ACTIVITY_)IN_PROGRESS
+      //   |||| ||\____{  2} TRIGGER_ACTIVE
+      //   |||| ||              
+      //   |||| |\_____ }                    {  4} RECEIVING_PREFIX          
+      //   |||| \______ }    Activity Bits   {  8} LISTEN_TO_SENDER_ADDRESS
+      //   |||\________ }                    { 12} LISTEN_TO_RECIVER_ADDRESS
+      //   |||                               { 16} RECEIVING_MESSAGE_LENGTH
+      //   |||                               { 20} RECEIVING_MESSAGE
+      //   |||                               { 24} RESERVED (NO FUNCTION)
+      //   |||                               { 28} RESERVED (NO FUNCTION)
+      //   |||                               
+      //   |||
+      //   ||\_________{ 32} DATA_READY
+      //   |\__________{ 64} ABORTED
+      //   \___________{128} CHECKSUMS_IS_INCORRECT
 
-        BENNetwork          ( int address = 0, void (*) (void) = NULL );
-        ~BENNetwork         (  );
+    arg1FuncContainer<void, char> statesChange;
 
-        bool send           ( int address, char *message[] );
-        void trigger        (  );
+    BENNetwork          ( int address = 0, 
+                          arg1FuncContainer<void, char> _statesChange = 
+                              (arg1FuncContainer<void, char>){NULL});
+    ~BENNetwork         (  );
 
-        //DECODING
-        void listen         ( bool receivedBit  );
-        void listen         ( char receivedByte );
-        
-        void resetBitBuffer  (  );
-        void resetFlags      (  );
-        void activateState   ( char stateByte );
-        void deactivateState ( char stateByte );
-        void changeActivity  ( char stateByte );
-        bool checkActivity   ( char activity  );
-        bool checkState      ( char stateByte );
-        void clearMessage    (  );
+    bool send           ( int address, char *message[] );
+    
 
-private:
-	void addToBitBuffer          ( bool receivedBit  );
-	void listenToReceiverAddress ( char receivedByte );
-	void listenToMessageLength   ( char receivedByte );
-	void listenToSenderAddress   ( char receivedByte );
-	void listenToMessage         ( char receivedByte );
-	void lsitenToPrefix          ( bool receivedBit  );
-};
+    //DECODING
+    void listen         ( bool receivedBit  );
+    void listen         ( char receivedByte );
+    
+    void resetBitBuffer  (  );
+    void resetFlags      (  );
+    void activateState   ( char stateByte );
+    void deactivateState ( char stateByte );
+    void changeActivity  ( char stateByte );
+    bool checkActivity   ( char activity  );
+    bool checkState      ( char stateByte );
+    void clearMessage    (  );
+
+  private:
+  	void addToBitBuffer          ( bool receivedBit  );
+  	void listenToReceiverAddress ( char receivedByte );
+  	void listenToMessageLength   ( char receivedByte );
+  	void listenToSenderAddress   ( char receivedByte );
+  	void listenToMessage         ( char receivedByte );
+  	void listenToPrefix          ( bool receivedBit  );
+  };
+
 }
 
 #endif // ___BEN_H___

@@ -12,15 +12,8 @@ namespace BEN {
 	    ENABLED = true;
 	}
 
-	void BENClass::trigger() {
-		List<BENNetwork*>* nextItem = network;
-	    while(nextItem != NULL) {
-	    	nextItem->get()->trigger();
-	    	nextItem = nextItem->next();
-	    }
-	}
 
-	void BENClass::attach(BENNetwork *newNetwork) {
+	void BENClass::attach(BENNetwork* newNetwork) {
 		if (network != NULL) {
 			network = new List<BENNetwork*> (newNetwork);
 

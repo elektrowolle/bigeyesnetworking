@@ -61,11 +61,14 @@
 #define ABORTED                    0x40
 #define CHECKSUMS_ARE_INCORRECT    0x80
 
+#define CHECK_ACTIVITY(stateByte,activity)  (stateByte & ACTIVITY_MASK) == activity
+#define CHECK_STATE(stateByte,flag)         (stateByte & flag) != 0
+
 //\FLAGS
 /////////////
 
 //DATA PACKAGE PROPERTIES
-#define OVERHEAD_CHECKSUM_OFFSET  0x01
+#define OVERHEAD_CHECKSUM_OFFSET   0x01
 #define CHECKSUM_PERIOD            0x06
 #define OVERHEAD                   0x06
 
@@ -80,6 +83,7 @@ namespace BEN {
 
 	const static char PREFIX = 0x55;
 
+
 	static bool isPrefix(char byteToCheck, char length) {
 		char mask         = 0xff << (8 - length);
 		char maskedPrefix = (PREFIX & mask);
@@ -87,7 +91,7 @@ namespace BEN {
 	}
 
 	//
-	//  Pretty Simple  Generic LinkedList. Steal it!
+	//  Pretty Simple Generic LinkedList. Steal it!
 	//
 
 	template <typename Type> class List {
@@ -152,6 +156,39 @@ namespace BEN {
 			this->value = value;
 		}
 	};
+
+
+	///Function Container
+	
+	struct funcContainer{
+		typedef void(*_func) (void);
+		_func f;
+	  
+		void operator()() {
+			f();
+		}
+		
+		void operator=(_func _f) {
+			f = _f;
+		}
+	};
+
+	template <typename retT, typename argT>
+	struct arg1FuncContainer{
+		typedef retT(*_func) (argT);
+		_func f;
+		retT operator()(argT arg) {
+			f(arg);
+		}
+	  
+		void operator=(_func _f) {
+			f = _f;
+		}
+	};
+
+	//TODO:: inherit funcContainer from arg1FuncContainer
 }
+
+
 
 #endif // ___UTILITY_H___

@@ -3,24 +3,23 @@
 
 namespace BEN {
 
-    BENNetwork::BENNetwork(int localAddress, void (*userFunc)(void)) {
+  BENNetwork::BENNetwork(int localAddress, arg1FuncContainer<void, char> _statesChange) {
 
-        this->LOCAL_ADDRESS = localAddress;
+      this->LOCAL_ADDRESS = localAddress;
 
-        this->clearMessage();
-        this->intFunc = userFunc;
-        this->STATES  = DEFAULT_STATES;
-        this->availableData = new BENDataPackage();
-    }
+      this->clearMessage();
+      // this->intFunc = userFunc;
+      this->STATES  = DEFAULT_STATES;
+      this->availableData = new BENDataPackage();
+      this->statesChange = _statesChange;
+  }
 
 
-    bool BENNetwork::send(int address, char *message[] ) {
-        return false;
-    }
+  bool BENNetwork::send(int address, char *message[] ) {
+      return false;
+  }
 
-    void BENNetwork::trigger() {
-        if(TRIGGER_ACTIVE) this->intFunc();
-    }
+    
 
 	void BENNetwork::addToBitBuffer(bool receivedBit) {
 		this->receivedBitBuffer += (receivedBit ? 1 : 0)
@@ -28,7 +27,7 @@ namespace BEN {
 		this->receivedBitBufferPosition ++;
 	}
 
-	void BENNetwork::lsitenToPrefix(bool receivedBit) {
+	void BENNetwork::listenToPrefix(bool receivedBit) {
 		if (!BEN::isPrefix(this->receivedBitBuffer,
 				this->receivedBitBufferPosition)) {
 			this->resetBitBuffer();
@@ -111,7 +110,7 @@ namespace BEN {
 		}
 
         if (this->checkActivity(RECEIVING_PREFIX) && this->checkState(IN_PROGRESS)){
-            lsitenToPrefix(receivedBit);
+            listenToPrefix(receivedBit);
         }
 
         if (this->receivedBitBufferPosition > 7) {
@@ -174,89 +173,96 @@ namespace BEN {
 		}
 	}
 
-    void BENNetwork::listen(char receivedByte) {
-        if (this->checkActivity(RECEIVING_MESSAGE)) {
-        	listenToMessage(receivedByte);
+  void BENNetwork::listen(char receivedByte) {
+      if (this->checkActivity(RECEIVING_MESSAGE)) {
+      	listenToMessage(receivedByte);
 
-        } else if (checkActivity(RECEIVING_MESSAGE_LENGTH)) {
-        	listenToMessageLength(receivedByte);
+      } else if (checkActivity(RECEIVING_MESSAGE_LENGTH)) {
+      	listenToMessageLength(receivedByte);
 
-        } else if (this->checkActivity(LISTEN_TO_RECEIVER_ADDRESS)) {
-        	listenToReceiverAddress(receivedByte);
+      } else if (this->checkActivity(LISTEN_TO_RECEIVER_ADDRESS)) {
+      	listenToReceiverAddress(receivedByte);
 
-        } else if (this->checkActivity(LISTEN_TO_SENDER_ADDRESS)) {
-        	listenToSenderAddress(receivedByte);
-        }
-        
-    }
+      } else if (this->checkActivity(LISTEN_TO_SENDER_ADDRESS)) {
+      	listenToSenderAddress(receivedByte);
+      }
+      
+  }
 
-    void BENNetwork::resetBitBuffer() {
-        this->receivedBitBuffer         = 0;
-        this->receivedBitBufferPosition = 0;
-    }
+  void BENNetwork::resetBitBuffer() {
+    this->receivedBitBuffer         = 0;
+    this->receivedBitBufferPosition = 0;
+  }
 
-    void BENNetwork::resetFlags() {
-        this->STATES = DEFAULT_STATES;
-    }
+  void BENNetwork::resetFlags() {
+    char _previousStates = this->STATES;
+    this->STATES = DEFAULT_STATES;
+    statesChange(this->STATES ^ _previousStates);
+  }
 
-    void BENNetwork::activateState(char stateByte) {
-        this->STATES |= stateByte;
-    }
+  void BENNetwork::activateState(char stateByte) {
+    char _previousStates = this->STATES;
+    this->STATES |= stateByte;
+    statesChange(this->STATES ^ _previousStates);
+  }
 
-    void BENNetwork::deactivateState(char stateByte) {
-        this->STATES &= ~stateByte;
-    }
+  void BENNetwork::deactivateState(char stateByte) {
+    char _previousStates = this->STATES;
+    this->STATES &= ~stateByte;
+    statesChange(this->STATES ^ _previousStates);
+  }
 
-    void BENNetwork::changeActivity (char stateByte) {
-        /**
-         *  //
-			// EXAMPLE:
-			//   Current activity is RECEIVING_PREFIX. The Trigger is active as well.
-			//   The activity is going to be changed to RECEIVING_MESSAGE.
-			//
-			//   this->changeActivity(0x10);
-			//
-			// STATES   : [0000 0110]
-			// stateByte: [0001 0000]
-			//
-			// 01: STATES & ~ACTIVITY_MASK
-			//     [0000 0110]
-			//   &~[1110 0011]
-			//   =============
-			//     [0000 0010] result 1
-			//
-			// 02: stateByte & ACTIVITY_MASK
-			//     [0001 0000]
-			//   & [0001 1100]
-			//   =============
-			//     [0001 0000] result 2
-			//
-			// 03: result1 | result 2
-			//     [0000 0010]
-			//   | [0001 0000]
-			//   =============
-			//     [0001 0010]
-			//
-		*
-		*/
+  void BENNetwork::changeActivity (char stateByte) {
+      /**
+       *  //
+		// EXAMPLE:
+		//   Current activity is RECEIVING_PREFIX. The Trigger is active as well.
+		//   The activity is going to be changed to RECEIVING_MESSAGE.
+		//
+		//   this->changeActivity(0x10);
+		//
+		// STATES   : [0000 0110]
+		// stateByte: [0001 0000]
+		//
+		// 01: STATES & ~ACTIVITY_MASK
+		//     [0000 0110]
+		//   &~[1110 0011]
+		//   =============
+		//     [0000 0010] result 1
+		//
+		// 02: stateByte & ACTIVITY_MASK
+		//     [0001 0000]
+		//   & [0001 1100]
+		//   =============
+		//     [0001 0000] result 2
+		//
+		// 03: result1 | result 2
+		//     [0000 0010]
+		//   | [0001 0000]
+		//   =============
+		//     [0001 0010]
+		//
+	*
+	*/
+    char _previousStates = this->STATES;
+    this->STATES = (this->STATES & ~ACTIVITY_MASK) | (stateByte & ACTIVITY_MASK);
+    statesChange(this->STATES ^ _previousStates);
+  }
 
-        this->STATES = (this->STATES & ~ACTIVITY_MASK) | (stateByte & ACTIVITY_MASK);
-    }
+  bool BENNetwork::checkActivity(char activity) {
+    return CHECK_ACTIVITY(this->STATES, activity);
+  }
 
-    bool BENNetwork::checkActivity(char activity) {
-    	return (this->STATES & ACTIVITY_MASK) == activity;
-    }
+  bool BENNetwork::checkState(char stateByte) {
+    return CHECK_STATE(this->STATES, stateByte);
+  }
 
-    bool BENNetwork::checkState(char stateByte) {
-        return (this->STATES & stateByte) != 0;
-    }
-
-    void BENNetwork::clearMessage() {
-        this->receivedBitBuffer         = 0;
-        this->receivedBitBufferPosition = 0;
-        
-        delete availableData;
-    }
+  void BENNetwork::clearMessage() {
+    this->receivedBitBuffer         = 0;
+    this->receivedBitBufferPosition = 0;
+    
+    delete availableData;
+  }
 
 }
 
