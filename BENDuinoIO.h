@@ -31,35 +31,58 @@
 #define benFreet(t0,tn)    (tn - t0 > benFREEv * scandt)
 
 namespace BEN{
-	class BENDuinoIO
-	{
-	public:
-		BENNetwork * ben;
-		
-		
-		List< funcContainer                    > * onLineBecameFreeF    ;
-		List< funcContainer                    > * onReadyForNextBitF   ;
-		List< funcContainer                    > * onLineBecameOccupiedF;
-		List< funcContainer                    > * onIsOccupiedF        ;
-		//List< BENNetwork::voidBENDataPackageFuncPtr > * onReceivedMessageF;
+  class BENDuinoIO
+  {
+  public:
+    BENNetwork * ben;
+    
+    
+    List< funcContainer> * onLineBecameFreeF    ;
+    List< funcContainer> * onReadyForNextBitF   ;
+    List< funcContainer> * onLineBecameOccupiedF;
+    List< funcContainer> * onIsOccupiedF        ;
+    //List< BENNetwork::voidBENDataPackageFuncPtr > * onReceivedMessageF;
 
-		BENDuinoIO  ( int id = 0, char netPin = 2 );
-		~BENDuinoIO ( );
+    BENDuinoIO  ( int id = 0, char netPin = 2 );
+    ~BENDuinoIO ( );
 
-		void loop ( );
-	private:
-		unsigned long lastBitT       = 0;
-		unsigned long lastScanT      = 0;
-		unsigned long lastTransmiT   = 0;
-		unsigned long occupiedSinceT = 0;
-		bool          bufferedBit    = 0;
-		char          netPin;
+    void loop ( );
+
+    // Hooks to track network activity
+    arg1FuncContainer<void, BENNetwork*> onStatesChanged                      ;
+    arg1FuncContainer<void, BENNetwork*> onIN_PROGRESSActivates               ;
+    arg1FuncContainer<void, BENNetwork*> onIN_PROGRESSDeactivates             ;
+    arg1FuncContainer<void, BENNetwork*> onTRIGGER_ACTIVEActivates            ;
+    arg1FuncContainer<void, BENNetwork*> onTRIGGER_ACTIVEDeactivates          ;
+    arg1FuncContainer<void, BENNetwork*> onDATA_READYActivates                ;
+    arg1FuncContainer<void, BENNetwork*> onDATA_READYDeactivates              ;
+    arg1FuncContainer<void, BENNetwork*> onABORTEDActivates                   ;
+    arg1FuncContainer<void, BENNetwork*> onABORTEDDeactivates                 ;
+    arg1FuncContainer<void, BENNetwork*> onCHECKSUMS_ARE_INCORRECTActivates   ;
+    arg1FuncContainer<void, BENNetwork*> onCHECKSUMS_ARE_INCORRECTDeactivates ;
+
+    arg1FuncContainer<void, BENNetwork*> onActivityBecameRECEIVING_PREFIX          ;
+    arg1FuncContainer<void, BENNetwork*> onActivityBecameLISTEN_TO_SENDER_ADDRESS  ;
+    arg1FuncContainer<void, BENNetwork*> onActivityBecameLISTEN_TO_RECEIVER_ADDRESS;
+    arg1FuncContainer<void, BENNetwork*> onActivityBecameRECEIVING_MESSAGE_LENGTH  ;
+    arg1FuncContainer<void, BENNetwork*> onActivityBecameRECEIVING_MESSAGE         ;
+
+
+  private:
+    unsigned long lastBitT       = 0;
+    unsigned long lastScanT      = 0;
+    unsigned long lastTransmiT   = 0;
+    unsigned long occupiedSinceT = 0;
+    bool          bufferedBit    = 0;
+    char          netPin;
         
-        bool seperator    = false;
-		bool transmitting = false;
+    bool seperator    = false;
+    bool transmitting = false;
 
-	};
-	extern BENDuinoIO benIO;
-	void statesChanged(char changedBytes);
+    
+  };
+  extern BENDuinoIO* benIO;
+  void statesChanged(BENNetwork* ben, char changedBytes);
+  
 }
 #endif //___BENDuino_h__

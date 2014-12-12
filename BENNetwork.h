@@ -91,11 +91,12 @@ namespace BEN {
       //   |\__________{ 64} ABORTED
       //   \___________{128} CHECKSUMS_IS_INCORRECT
 
-    arg1FuncContainer<void, char> statesChange;
+    arg2FuncContainer<void, BENNetwork*, char> __statesChange;
+    #define statesChange(_pS) __statesChange(this, this->STATES ^ _pS);
 
     BENNetwork          ( int address = 0, 
-                          arg1FuncContainer<void, char> _statesChange = 
-                              (arg1FuncContainer<void, char>){NULL});
+                          arg2FuncContainer<void, BENNetwork*, char> _statesChange = 
+                              (arg2FuncContainer<void, BENNetwork*, char>){NULL});
     ~BENNetwork         (  );
 
     bool send           ( int address, char *message[] );
@@ -111,6 +112,7 @@ namespace BEN {
     void deactivateState ( char stateByte );
     void changeActivity  ( char stateByte );
     bool checkActivity   ( char activity  );
+    char getActivity     ();
     bool checkState      ( char stateByte );
     void clearMessage    (  );
 

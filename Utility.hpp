@@ -60,10 +60,6 @@
 #define DATA_READY                 0x20
 #define ABORTED                    0x40
 #define CHECKSUMS_ARE_INCORRECT    0x80
-
-#define CHECK_ACTIVITY(stateByte,activity)  (stateByte & ACTIVITY_MASK) == activity
-#define CHECK_STATE(stateByte,flag)         (stateByte & flag) != 0
-
 //\FLAGS
 /////////////
 
@@ -72,6 +68,9 @@
 #define CHECKSUM_PERIOD            0x06
 #define OVERHEAD                   0x06
 
+#define CHECK_ACTIVITY(stateByte,activity)  (stateByte & ACTIVITY_MASK) == activity
+#define CHECK_STATE(stateByte,flag)         (stateByte & flag) != 0
+#define GET_ACTIVITY(stateByte)             (stateByte & ACTIVITY_MASK)
 
 #define NULL                       0x00
 #endif 
@@ -179,6 +178,19 @@ namespace BEN {
 		_func f;
 		retT operator()(argT arg) {
 			f(arg);
+		}
+	  
+		void operator=(_func _f) {
+			f = _f;
+		}
+	};
+
+	template <typename retT, typename argT1, typename argT2>
+	struct arg2FuncContainer{
+		typedef retT(*_func) (argT1, argT2);
+		_func f;
+		retT operator()(argT1 arg1, argT2 arg2) {
+			f(arg1, arg2);
 		}
 	  
 		void operator=(_func _f) {

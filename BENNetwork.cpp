@@ -3,7 +3,7 @@
 
 namespace BEN {
 
-  BENNetwork::BENNetwork(int localAddress, arg1FuncContainer<void, char> _statesChange) {
+  BENNetwork::BENNetwork(int localAddress, arg2FuncContainer<void, BENNetwork*, char> _statesChange) {
 
       this->LOCAL_ADDRESS = localAddress;
 
@@ -11,7 +11,7 @@ namespace BEN {
       // this->intFunc = userFunc;
       this->STATES  = DEFAULT_STATES;
       this->availableData = new BENDataPackage();
-      this->statesChange = _statesChange;
+      this->__statesChange = _statesChange;
   }
 
 
@@ -197,19 +197,19 @@ namespace BEN {
   void BENNetwork::resetFlags() {
     char _previousStates = this->STATES;
     this->STATES = DEFAULT_STATES;
-    statesChange(this->STATES ^ _previousStates);
+    statesChange(_previousStates);
   }
 
   void BENNetwork::activateState(char stateByte) {
     char _previousStates = this->STATES;
     this->STATES |= stateByte;
-    statesChange(this->STATES ^ _previousStates);
+    statesChange(_previousStates);
   }
 
   void BENNetwork::deactivateState(char stateByte) {
     char _previousStates = this->STATES;
     this->STATES &= ~stateByte;
-    statesChange(this->STATES ^ _previousStates);
+    statesChange(_previousStates);
   }
 
   void BENNetwork::changeActivity (char stateByte) {
@@ -246,11 +246,15 @@ namespace BEN {
 	*/
     char _previousStates = this->STATES;
     this->STATES = (this->STATES & ~ACTIVITY_MASK) | (stateByte & ACTIVITY_MASK);
-    statesChange(this->STATES ^ _previousStates);
+    statesChange(_previousStates);
   }
 
   bool BENNetwork::checkActivity(char activity) {
     return CHECK_ACTIVITY(this->STATES, activity);
+  }
+
+  char BENNetwork::getActivity() {
+    return GET_ACTIVITY(this->STATES);
   }
 
   bool BENNetwork::checkState(char stateByte) {
